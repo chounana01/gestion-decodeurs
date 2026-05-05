@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Décodeurs</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #e8eaf6; }
+        nav {
+            background: #0d1b2a;
+            padding: 15px 30px;
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-bottom: 4px solid #f47c20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        nav span.accent { color: #f47c20; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab {
+            padding: 10px 20px;
+            background: #1c3557;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .tab.active { background: #f47c20; color: white; }
+        .tab:hover { background: #f47c20; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(13,27,42,0.12);
+            border-left: 5px solid #f47c20;
+        }
+        h2 { color: #0d1b2a; margin-bottom: 15px; }
+        h3 { color: #1c3557; margin-bottom: 10px; }
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #b0bec5;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 14px;
+            width: 200px;
+            background: #f5f7fa;
+            color: #0d1b2a;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f47c20;
+            box-shadow: 0 0 0 2px rgba(244,124,32,0.2);
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 3px;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+        .btn-blue { background: #1c3557; color: #fff; }
+        .btn-red { background: #c0392b; color: white; }
+        .btn-green { background: #1c3557; color: #fff; }
+        .btn-orange { background: #f47c20; color: white; }
+        .btn-grey { background: #90a4ae; color: #0d1b2a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #0d1b2a; color: #fff; padding: 10px; text-align: left; }
+        th:first-child { border-left: 3px solid #f47c20; }
+        td { padding: 10px; border-bottom: 1px solid #eceff1; color: #0d1b2a; }
+        tr:hover { background: #fff3e0; }
+        .badge { padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+        .badge-green { background: #e8f5e9; color: #1b5e20; }
+        .badge-red { background: #ffebee; color: #c62828; }
+        #message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            display: none;
+            z-index: 999;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .msg-success { background: #1c3557; border-left: 4px solid #f47c20; }
+        .msg-error { background: #c0392b; }
+        .form-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    📺 <span class="accent">Gestion</span> des Décodeurs — Câblodistributeur
+    <span style="margin-left: auto; font-size: 14px; display: flex; align-items: center; gap: 15px;">
+        <span id="nomUtilisateur">👤</span>
+        <button onclick="seDeconnecter()" style="background: #f47c20; color: white; border: none; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 13px;">
+            Déconnexion
+        </button>
+    </span>
+</nav>
+
+<div id="message"></div>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('clients', event)">👥 Clients</button>
+        <button class="tab" onclick="showTab('decodeurs', event)">📡 Décodeurs</button>
+        <button class="tab" id="tabUtilisateurs" onclick="showTab('utilisateurs', event)">👤 Utilisateurs</button>
+    </div>
+
+    <!-- SECTION CLIENTS -->
+    <div id="clients" class="section active">
+        <div class="card">
+            <h2>Gestion des Clients</h2>
+            <div class="form-row">
+                <input type="text" id="nomClient" placeholder="Nom du client">
+                <button class="btn-blue" onclick="creerClient()">+ Ajouter client</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Liste des clients</h3>
+            <table>
+                <thead>
+                <tr><th>ID</th><th>Nom</th><th>Date création</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="tableClients"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECTION DECODEURS -->
+    <div id="decodeurs" class="section">
+        <div class="card">
+            <h2>Gestion des Décodeurs</h2>
+            <div class="form-row">
+                <select id="selectClient" onchange="chargerDecodeurs()">
+                    <option value="">-- Choisir un client --</option>
+                </select>
+                <input type="text" id="nomDecodeur" placeholder="Nom du décodeur" autocomplete="off">
+                <select id="adresseIp">
+                    <option value="">-- Adresse IP --</option>
+                    <option value="127.0.10.1">127.0.10.1</option>
+                    <option value="127.0.10.2">127.0.10.2</option>
+                    <option value="127.0.10.3">127.0.10.3</option>
+                    <option value="127.0.10.4">127.0.10.4</option>
+                    <option value="127.0.10.5">127.0.10.5</option>
+                    <option value="127.0.10.6">127.0.10.6</option>
+                    <option value="127.0.10.7">127.0.10.7</option>
+                    <option value="127.0.10.8">127.0.10.8</option>
+                    <option value="127.0.10.9">127.0.10.9</option>
+                    <option value="127.0.10.10">127.0.10.10</option>
+                    <option value="127.0.10.11">127.0.10.11</option>
+                    <option value="127.0.10.12">127.0.10.12</option>
+                </select>
+                <button class="btn-blue" onclick="ajouterDecodeur()">+ Ajouter décodeur</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Liste des décodeurs</h3>
+            <table>
+                <thead>
+                <tr><th>ID</th><th>Nom</th><th>Adresse IP</th><th>Statut</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="tableDecodeurs"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECTION UTILISATEURS -->
+    <div id="utilisateurs" class="section">
+        <div class="card">
+            <h2>Gestion des Utilisateurs</h2>
+            <div class="form-row">
+                <input type="text" id="nomUser" placeholder="Nom complet">
+                <input type="email" id="courrielUser" placeholder="Courriel">
+                <input type="password" id="mdpUser" placeholder="Mot de passe">
+                <select id="roleUser">
+                    <option value="USER">Utilisateur</option>
+                    <option value="ADMIN">Administrateur</option>
+                </select>
+                <select id="clientUser">
+                    <option value="">-- Client associé --</option>
+                </select>
+                <button class="btn-blue" onclick="creerUtilisateur()">+ Ajouter</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Liste des utilisateurs</h3>
+            <table>
+                <thead>
+                <tr><th>ID</th><th>Nom</th><th>Courriel</th><th>Rôle</th><th>Client associé</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="tableUtilisateurs"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8080';
+
+    function showTab(tab, e) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        e.target.classList.add('active');
+        if (tab === 'decodeurs') chargerSelectClients();
+        if (tab === 'utilisateurs') {
+            chargerUtilisateurs();
+            chargerSelectUtilisateurs();
+        }
+    }
+
+    function showMessage(msg, type) {
+        const el = document.getElementById('message');
+        el.textContent = msg;
+        el.className = type === 'success' ? 'msg-success' : 'msg-error';
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 4000);
+    }
+
+    function verifierConnexion() {
+        const user = localStorage.getItem('user');
+        if (!user) {
+            window.location.href = '/login.html';
+            return;
+        }
+        try {
+            const u = JSON.parse(user);
+            document.getElementById('nomUtilisateur').textContent = '👤 ' + u.nom + ' (' + u.role + ')';
+
+            if (u.role !== 'ADMIN') {
+                // Cacher onglets Clients et Utilisateurs
+                document.getElementById('tabUtilisateurs').style.display = 'none';
+                document.querySelectorAll('.tab')[0].style.display = 'none';
+
+                // Aller directement sur Décodeurs
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.getElementById('decodeurs').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+
+                // Cacher formulaire d'ajout
+                document.querySelector('#decodeurs .card:first-child').style.display = 'none';
+
+                // Charger ses décodeurs automatiquement
+                if (u.clientId) {
+                    chargerDecodeursDuUser(u.clientId);
+                } else {
+                    document.getElementById('tableDecodeurs').innerHTML =
+                        '<tr><td colspan="5" style="text-align:center; color:#888;">Aucun client associé à votre compte. Contactez l\'administrateur.</td></tr>';
+                }
+            }
+        } catch(e) {
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+    }
+
+    function seDeconnecter() {
+        localStorage.removeItem('user');
+        window.location.href = '/login.html';
+    }
+
+    // CLIENTS
+    async function chargerClients() {
+        const res = await fetch(`${API}/clients`);
+        const clients = await res.json();
+        const tbody = document.getElementById('tableClients');
+        tbody.innerHTML = '';
+        clients.forEach(c => {
+            tbody.innerHTML += `
+        <tr>
+            <td>${c.id}</td>
+            <td>${c.nom}</td>
+            <td>${c.dateCreation ? c.dateCreation.substring(0,10) : '-'}</td>
+            <td>
+    <button class="btn-orange" onclick="modifierClient(${c.id}, '${c.nom}')">✏️ Modifier</button>
+    <button class="btn-red" onclick="supprimerClient(${c.id})">🗑 Supprimer</button>
+</td>
+        </tr>`;
+        });
+    }
+
+    async function creerClient() {
+        const nom = document.getElementById('nomClient').value;
+        if (!nom) return showMessage('Entrez un nom de client', 'error');
+        await fetch(`${API}/clients`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nom})
+        });
+        document.getElementById('nomClient').value = '';
+        showMessage('Client créé !', 'success');
+        chargerClients();
+    }
+
+    async function supprimerClient(id) {
+        if (!confirm('Supprimer ce client ?')) return;
+        await fetch(`${API}/clients/${id}`, {method: 'DELETE'});
+        showMessage('Client supprimé !', 'success');
+        chargerClients();
+    }
+
+
+    async function modifierClient(id, nomActuel) {
+        const nouveauNom = prompt('Nouveau nom du client :', nomActuel);
+        if (!nouveauNom || nouveauNom === nomActuel) return;
+        const res = await fetch(`${API}/clients/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nom: nouveauNom})
+        });
+        if (res.ok) {
+            showMessage('Client modifié !', 'success');
+            chargerClients();
+        }
+    }
+
+    // DECODEURS
+    async function chargerSelectClients() {
+        const res = await fetch(`${API}/clients`);
+        const clients = await res.json();
+        const sel = document.getElementById('selectClient');
+        sel.innerHTML = '<option value="">-- Choisir un client --</option>';
+        clients.forEach(c => {
+            sel.innerHTML += `<option value="${c.id}">${c.nom}</option>`;
+        });
+    }
+
+    async function chargerDecodeurs() {
+        const clientId = document.getElementById('selectClient').value;
+        if (!clientId) return;
+        const res = await fetch(`${API}/decodeurs/client/${clientId}`);
+        const decodeurs = await res.json();
+        const tbody = document.getElementById('tableDecodeurs');
+        tbody.innerHTML = '';
+        decodeurs.forEach(d => {
+            tbody.innerHTML += `
+        <tr>
+            <td>${d.id}</td>
+            <td>${d.nom}</td>
+            <td>${d.adresseIp}</td>
+            <td><span class="badge ${d.statut === 'Actif' ? 'badge-green' : 'badge-red'}">${d.statut}</span></td>
+            <td>
+                <button class="btn-green" onclick="getEtat(${d.id})">📊 État</button>
+                <button class="btn-orange" onclick="resetDecodeur(${d.id})">🔄 Reset</button>
+                <button class="btn-blue" onclick="reinitDecodeur(${d.id})">🔑 Reinit</button>
+                <button class="btn-grey" onclick="voirChaines(${d.id})">📺 Chaînes</button>
+                <button class="btn-red" onclick="shutdownDecodeur(${d.id})">⏻ Shutdown</button>
+                <button class="btn-orange" onclick="modifierDecodeur(${d.id}, '${d.nom}', '${d.adresseIp}')">✏️ Modifier</button>
+                <button class="btn-red" onclick="supprimerDecodeur(${d.id})">🗑 Supprimer</button>
+
+            </td>
+        </tr>`;
+        });
+    }
+
+    async function chargerDecodeursDuUser(clientId) {
+        const res = await fetch(`${API}/decodeurs/client/${clientId}`);
+        const decodeurs = await res.json();
+        const tbody = document.getElementById('tableDecodeurs');
+        tbody.innerHTML = '';
+
+        if (decodeurs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Aucun décodeur trouvé.</td></tr>';
+            return;
+        }
+
+        decodeurs.forEach(d => {
+            tbody.innerHTML += `
+        <tr>
+            <td>${d.id}</td>
+            <td>${d.nom}</td>
+            <td>${d.adresseIp}</td>
+            <td><span class="badge ${d.statut === 'Actif' ? 'badge-green' : 'badge-red'}">${d.statut}</span></td>
+            <td>
+                <button class="btn-green" onclick="getEtat(${d.id})">📊 État</button>
+                <button class="btn-orange" onclick="resetDecodeur(${d.id})">🔄 Reset</button>
+                <button class="btn-blue" onclick="reinitDecodeur(${d.id})">🔑 Reinit</button>
+                <button class="btn-grey" onclick="voirChaines(${d.id}, ${clientId})">📺 Chaînes</button>
+                <button class="btn-red" onclick="shutdownDecodeur(${d.id})">⏻ Shutdown</button>
+            </td>
+        </tr>`;
+        });
+    }
+
+
+
+    async function ajouterDecodeur() {
+        const clientId = document.getElementById('selectClient').value;
+        const nom = document.getElementById('nomDecodeur').value;
+        const adresseIp = document.getElementById('adresseIp').value;
+        if (!clientId || !nom || !adresseIp) return showMessage('Remplissez tous les champs', 'error');
+        const res = await fetch(`${API}/decodeurs/client/${clientId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nom, adresseIp, statut: 'Actif'})
+        });
+        if (res.ok) {
+            document.getElementById('nomDecodeur').value = '';
+            document.getElementById('adresseIp').selectedIndex = 0;
+            showMessage('Décodeur ajouté !', 'success');
+            await chargerDecodeurs();
+        } else {
+            showMessage('Erreur lors de l ajout', 'error');
+        }
+    }
+
+
+    async function modifierDecodeur(id, nomActuel, ipActuelle) {
+        const nouveauNom = prompt('Nouveau nom du décodeur :', nomActuel);
+        if (!nouveauNom) return;
+
+        const ips = [
+            '127.0.10.1','127.0.10.2','127.0.10.3','127.0.10.4',
+            '127.0.10.5','127.0.10.6','127.0.10.7','127.0.10.8',
+            '127.0.10.9','127.0.10.10','127.0.10.11','127.0.10.12'
+        ];
+
+        const nouvelleIp = prompt(
+            'Nouvelle adresse IP :\n' + ips.map((ip, i) => `${i+1}. ${ip}`).join('\n') + '\n\nEntrez l\'IP exacte :',
+            ipActuelle
+        );
+        if (!nouvelleIp) return;
+
+        const res = await fetch(`${API}/decodeurs/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nom: nouveauNom, adresseIp: nouvelleIp})
+        });
+
+        if (res.ok) {
+            showMessage('Décodeur modifié !', 'success');
+            chargerDecodeurs();
+        } else {
+            showMessage('Erreur lors de la modification', 'error');
+        }
+    }
+
+
+    async function supprimerDecodeur(id) {
+        if (!confirm('Supprimer ce décodeur ?')) return;
+        await fetch(`${API}/decodeurs/${id}`, {method: 'DELETE'});
+        showMessage('Décodeur supprimé !', 'success');
+        chargerDecodeurs();
+    }
+
+    async function getEtat(id) {
+        const res = await fetch(`${API}/decodeurs/${id}/etat`);
+        const data = await res.json();
+        alert(`État: ${data.state}\nDernier redémarrage: ${data.lastRestart}\nDernière réinit: ${data.lastReinit}`);
+    }
+
+    async function resetDecodeur(id) {
+        if (!confirm('Redémarrer ce décodeur ?')) return;
+        showMessage('🔄 Redémarrage en cours... Vous serez notifié quand ce sera terminé.', 'success');
+        const res = await fetch(`${API}/decodeurs/${id}/reset`, {method: 'POST'});
+        const data = await res.json();
+        if (data) {
+            const interval = setInterval(async () => {
+                const etatRes = await fetch(`${API}/decodeurs/${id}/etat`);
+                const etat = await etatRes.json();
+                if (etat.state === 'Active') {
+                    clearInterval(interval);
+                    afficherNotification(`✅ Décodeur ${id} redémarré avec succès !`);
+                    chargerDecodeurs();
+                }
+            }, 5000);
+            setTimeout(() => clearInterval(interval), 60000);
+        }
+    }
+
+    function afficherNotification(message) {
+        const notif = document.createElement('div');
+        notif.style.cssText = `
+        position: fixed; top: 20px; right: 20px;
+        background: #1c3557; color: white;
+        padding: 15px 20px; border-radius: 8px;
+        border-left: 4px solid #f47c20;
+        font-weight: bold; z-index: 9999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        max-width: 350px;
+    `;
+        notif.textContent = message;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 5000);
+    }
+
+    async function reinitDecodeur(id) {
+        if (!confirm('Réinitialiser le mot de passe de ce décodeur ?')) return;
+        const res = await fetch(`${API}/decodeurs/${id}/reinit`, {method: 'POST'});
+        const data = await res.json();
+        if (data) {
+            afficherNotification(`🔑 Décodeur ${id} réinitialisé avec succès !`);
+            chargerDecodeurs();
+        }
+    }
+
+    async function shutdownDecodeur(id) {
+        if (!confirm('⚠️ Éteindre ce décodeur ?')) return;
+        const res = await fetch(`${API}/decodeurs/${id}/shutdown`, {method: 'POST'});
+        const data = await res.json();
+        if (data) {
+            afficherNotification(`⏻ Décodeur ${id} éteint !`);
+            chargerDecodeurs();
+        }
+    }
+
+    async function voirChaines(id) {
+        const clientId = document.getElementById('selectClient').value;
+        const res = await fetch(`${API}/decodeurs/client/${clientId}`);
+        const decodeurs = await res.json();
+        const decodeur = decodeurs.find(d => d.id === id);
+        if (!decodeur) return;
+
+        const chaines = decodeur.chaines;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'overlay';
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9998;`;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.style.cssText = `
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: white; padding: 25px;
+        border-radius: 10px; z-index: 9999;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        min-width: 350px; border-top: 5px solid #f47c20;
+    `;
+
+        let chainesHtml = chaines.length === 0
+            ? '<p style="color:#888; text-align:center; padding: 15px;">Aucune chaîne</p>'
+            : chaines.map(c => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                <span style="color: #0d1b2a; font-size: 15px;">📺 ${c}</span>
+                <button onclick="retirerChaine(${id}, '${c}', this.closest('.popup'))"
+                    style="background: #c0392b; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer;">
+                    🗑 Retirer
+                </button>
+            </div>`).join('');
+
+        popup.innerHTML = `
+        <h3 style="color: #0d1b2a; margin-bottom: 15px; border-bottom: 2px solid #f47c20; padding-bottom: 10px;">
+            📺 Chaînes du décodeur ${id}
+        </h3>
+        ${chainesHtml}
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button onclick="ajouterChaineDepuisPopup(${id})"
+                style="background: #1c3557; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; flex:1;">
+                + Ajouter chaîne
+            </button>
+            <button onclick="this.closest('.popup').remove(); document.getElementById('overlay').remove();"
+                style="background: #f47c20; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; flex:1;">
+                Fermer
+            </button>
+        </div>
+    `;
+
+        overlay.onclick = () => { popup.remove(); overlay.remove(); };
+        document.body.appendChild(overlay);
+        document.body.appendChild(popup);
+    }
+
+    async function ajouterChaineDepuisPopup(id) {
+        const chaine = prompt('Nom de la chaîne à ajouter :');
+        if (!chaine) return;
+        await fetch(`${API}/decodeurs/${id}/chaines?chaine=${encodeURIComponent(chaine)}`, {method: 'POST'});
+        showMessage('Chaîne ajoutée !', 'success');
+        document.querySelector('.popup').remove();
+        document.getElementById('overlay').remove();
+        chargerDecodeurs();
+        setTimeout(() => voirChaines(id), 500);
+    }
+
+    async function retirerChaine(id, chaine, popup) {
+        if (!confirm(`Retirer la chaîne "${chaine}" ?`)) return;
+        await fetch(`${API}/decodeurs/${id}/chaines?chaine=${encodeURIComponent(chaine)}`, {method: 'DELETE'});
+        showMessage('Chaîne retirée !', 'success');
+        popup.remove();
+        document.getElementById('overlay').remove();
+        chargerDecodeurs();
+        setTimeout(() => voirChaines(id), 500);
+    }
+
+    // UTILISATEURS
+    async function chargerUtilisateurs() {
+        const res = await fetch(`${API}/utilisateurs`);
+        const users = await res.json();
+        const tbody = document.getElementById('tableUtilisateurs');
+        tbody.innerHTML = '';
+        users.forEach(u => {
+            tbody.innerHTML += `
+        <tr>
+            <td>${u.id}</td>
+            <td>${u.nom}</td>
+            <td>${u.courriel}</td>
+            <td><span class="badge ${u.role === 'ADMIN' ? 'badge-red' : 'badge-green'}">${u.role}</span></td>
+            <td>${u.clientAssocie ? u.clientAssocie.nom : '-'}</td>
+            <td><button class="btn-red" onclick="supprimerUtilisateur(${u.id})">🗑 Supprimer</button></td>
+        </tr>`;
+        });
+    }
+
+    async function chargerSelectUtilisateurs() {
+        const res = await fetch(`${API}/clients`);
+        const clients = await res.json();
+        const sel = document.getElementById('clientUser');
+        sel.innerHTML = '<option value="">-- Client associé --</option>';
+        clients.forEach(c => {
+            sel.innerHTML += `<option value="${c.id}">${c.nom}</option>`;
+        });
+    }
+
+    async function creerUtilisateur() {
+        const nom = document.getElementById('nomUser').value;
+        const courriel = document.getElementById('courrielUser').value;
+        const motDePasse = document.getElementById('mdpUser').value;
+        const role = document.getElementById('roleUser').value;
+        const clientId = document.getElementById('clientUser').value;
+
+        if (!nom || !courriel || !motDePasse) {
+            return showMessage('Remplissez tous les champs obligatoires', 'error');
+        }
+
+        const body = { nom, courriel, motDePasse, role };
+        if (clientId) body.clientId = clientId;
+
+        const res = await fetch(`${API}/auth/register`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            document.getElementById('nomUser').value = '';
+            document.getElementById('courrielUser').value = '';
+            document.getElementById('mdpUser').value = '';
+            showMessage('Utilisateur créé !', 'success');
+            chargerUtilisateurs();
+        } else {
+            const err = await res.text();
+            showMessage('Erreur : ' + err, 'error');
+        }
+    }
+
+    async function supprimerUtilisateur(id) {
+        if (!confirm('Supprimer cet utilisateur ?')) return;
+        await fetch(`${API}/utilisateurs/${id}`, {method: 'DELETE'});
+        showMessage('Utilisateur supprimé !', 'success');
+        chargerUtilisateurs();
+    }
+
+    async function chargerSelectClientsUser(clientId) {
+        const res = await fetch(`${API}/clients`);
+        const clients = await res.json();
+        const sel = document.getElementById('selectClient');
+        sel.innerHTML = '';
+        const client = clients.find(c => c.id == clientId);
+        if (client) {
+            sel.innerHTML = `<option value="${client.id}">${client.nom}</option>`;
+            sel.disabled = true;
+            await chargerDecodeurs();
+        }
+        // Cacher formulaire d'ajout pour USER
+        document.querySelector('#decodeurs .card:first-child').style.display = 'none';
+
+        // Cacher aussi le formulaire d'ajout de décodeur
+        document.querySelector('#decodeurs .card:first-child').style.display = 'none';
+    }
+
+    // Chargement initial
+    verifierConnexion();
+    chargerClients();
+</script>
+</body>
+</html>

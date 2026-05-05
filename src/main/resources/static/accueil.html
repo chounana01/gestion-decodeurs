@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - Gestion des Décodeurs</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1b2a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #0d1b2a;
+            border-bottom: 4px solid #f47c20;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header h1 { color: white; font-size: 22px; }
+        header h1 span { color: #f47c20; }
+        header p { color: #aaa; font-size: 13px; margin-top: 4px; }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: #aaa;
+            font-size: 16px;
+            margin-bottom: 50px;
+            max-width: 500px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            background: #1c3557;
+            border-radius: 12px;
+            padding: 40px 35px;
+            width: 280px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 5px solid #f47c20;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .card .icon { font-size: 55px; margin-bottom: 15px; }
+
+        .card h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .card ul {
+            text-align: left;
+            color: #ccc;
+            font-size: 13px;
+            margin-bottom: 25px;
+            padding-left: 20px;
+            line-height: 2;
+        }
+
+        .card button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .card button:hover { opacity: 0.85; }
+
+        .btn-admin { background: #f47c20; color: white; }
+        .btn-user { background: white; color: #0d1b2a; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .badge-admin { background: #ffebee; color: #c62828; }
+        .badge-user { background: #e8f5e9; color: #1b5e20; }
+
+        footer {
+            text-align: center;
+            color: #555;
+            font-size: 12px;
+            padding: 20px;
+            border-top: 1px solid #1c3557;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 35px;">📺</div>
+    <div>
+        <h1><span>Gestion</span> des Décodeurs — Câblodistributeur</h1>
+        <p>Système de gestion intranet — Accès réservé au personnel autorisé</p>
+    </div>
+</header>
+
+<div class="hero">
+    <h2>Bienvenue 👋</h2>
+    <p>Choisissez votre type d'accès pour vous connecter au système.</p>
+
+    <div class="cards">
+
+        <!-- ADMIN -->
+        <div class="card" onclick="window.location.href='/login.html?role=admin'">
+            <div class="icon">🔐</div>
+            <span class="badge badge-admin">ADMINISTRATEUR</span>
+            <h3>Accès Administrateur</h3>
+            <p>Gestion complète du système</p>
+            <ul>
+                <li>Gérer les clients</li>
+                <li>Gérer les décodeurs</li>
+                <li>Créer des comptes utilisateurs</li>
+                <li>Attribuer des droits d'accès</li>
+            </ul>
+            <button class="btn-admin">Se connecter →</button>
+        </div>
+
+        <!-- USER -->
+        <div class="card" onclick="window.location.href='/login.html?role=user'">
+            <div class="icon">📡</div>
+            <span class="badge badge-user">CLIENT</span>
+            <h3>Accès Client</h3>
+            <p>Contrôle de vos décodeurs</p>
+            <ul>
+                <li>Voir vos décodeurs</li>
+                <li>Vérifier l'état</li>
+                <li>Redémarrer / Réinitialiser</li>
+                <li>Gérer vos chaînes</li>
+            </ul>
+            <button class="btn-user">Se connecter →</button>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    © 2026 Câblodistributeur Régional — Tous droits réservés
+</footer>
+
+<script>
+    // Si déjà connecté, rediriger directement
+    if (localStorage.getItem('user')) {
+        window.location.href = '/index.html';
+    }
+</script>
+</body>
+</html>

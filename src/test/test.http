@@ -1,0 +1,51 @@
+### Créer un client
+POST http://localhost:8080/clients
+Content-Type: application/json
+
+{
+  "nom": "Client Test"
+}
+
+### Lister tous les clients
+GET http://localhost:8080/clients
+
+### Créer un decodeur pour le client 1
+POST http://localhost:8080/decodeurs/client/1
+Content-Type: application/json
+
+{
+  "nom": "Decodeur Salon",
+  "adresseIp": "127.0.10.1"
+}
+
+### Voir tous les decodeurs
+GET http://localhost:8080/decodeurs
+
+### Lister les decodeurs du client 1
+GET http://localhost:8080/decodeurs/client/1
+
+### Etat du decodeur 1
+GET http://localhost:8080/decodeurs/1/etat
+
+### Redemarrer decodeur 1
+POST http://localhost:8080/decodeurs/1/reset
+
+### Ajouter chaine
+POST http://localhost:8080/decodeurs/1/chaines?chaine=TVA
+
+### Supprimer decodeur
+DELETE http://localhost:8080/decodeurs/1
+
+### Supprimer client
+DELETE http://localhost:8080/clients/1
+
+### Créer compte admin
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "nom": "Administrateur",
+  "courriel": "admin@cable.com",
+  "motDePasse": "admin123",
+  "role": "ADMIN"
+}

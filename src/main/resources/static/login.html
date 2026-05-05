@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - Gestion des Décodeurs</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1b2a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            width: 380px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            border-top: 5px solid #f47c20;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo h1 {
+            color: #0d1b2a;
+            font-size: 22px;
+        }
+
+        .logo p {
+            color: #888;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .logo .icon {
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            color: #0d1b2a;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #0d1b2a;
+            background: #f5f7fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f47c20;
+            box-shadow: 0 0 0 2px rgba(244,124,32,0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 25px;
+            background: #f47c20;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #d4691a; }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="logo">
+        <div class="icon">📺</div>
+        <h1>Gestion des Décodeurs</h1>
+        <p>Câblodistributeur — Accès Intranet</p>
+    </div>
+
+    <label>Courriel</label>
+    <input type="email" id="courriel" placeholder="admin@cable.com">
+
+    <label>Mot de passe</label>
+    <input type="password" id="motDePasse" placeholder="••••••••">
+
+    <button onclick="seConnecter()">Se connecter</button>
+
+    <div class="error" id="erreur">❌ Courriel ou mot de passe incorrect.</div>
+
+    <div class="footer">© 2026 Câblodistributeur Régional</div>
+</div>
+
+<script>
+    // Afficher le bon titre selon le rôle
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');
+    if (role === 'admin') {
+        document.querySelector('.logo h1').textContent = 'Connexion Administrateur';
+        document.querySelector('.logo p').textContent = 'Accès complet au système';
+    } else if (role === 'user') {
+        document.querySelector('.logo h1').textContent = 'Connexion Client';
+        document.querySelector('.logo p').textContent = 'Accès à vos décodeurs';
+    }
+    async function seConnecter() {
+        const courriel = document.getElementById('courriel').value;
+        const motDePasse = document.getElementById('motDePasse').value;
+
+        if (!courriel || !motDePasse) {
+            document.getElementById('erreur').style.display = 'block';
+            document.getElementById('erreur').textContent = '❌ Veuillez remplir tous les champs.';
+            return;
+        }
+
+        const res = await fetch('http://localhost:8080/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({courriel, motDePasse})
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('user', JSON.stringify(data));
+            window.location.href = '/index.html';
+        } else {
+            document.getElementById('erreur').style.display = 'block';
+            document.getElementById('erreur').textContent = '❌ Courriel ou mot de passe incorrect.';
+        }
+    }
+
+    // Permettre Enter pour se connecter
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') seConnecter();
+    });
+</script>
+</body>
+</html>
