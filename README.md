@@ -1,15 +1,15 @@
-# Gestion des Decodeurs
+# Gestion des décodeurs
 
-Application web Spring Boot pour gerer des clients, des decodeurs et des utilisateurs dans un contexte de cablodistributeur.
+Application web Spring Boot pour gérer des clients, des décodeurs et des utilisateurs dans un contexte de câblodistributeur.
 
-## Fonctionnalites
+## Fonctionnalités
 
 - Authentification d'un administrateur ou d'un utilisateur
 - Gestion des clients
-- Gestion des decodeurs
+- Gestion des décodeurs
 - Gestion des utilisateurs
 - Interface web simple en HTML/CSS/JavaScript
-- API REST pour les operations principales
+- API REST pour les opérations principales
 
 ## Technologies
 
@@ -21,20 +21,26 @@ Application web Spring Boot pour gerer des clients, des decodeurs et des utilisa
 - MySQL
 - Maven
 
-## Prerequis
+## Prérequis
 
-- Java installe
-- Maven installe
+- Java installé
+- Maven installé (ou utiliser le wrapper `./mvnw` inclus dans le projet)
 - MySQL en marche sur la machine
 
-## Configuration de la base de donnees
+## Lancer le projet
 
-Le projet utilise une base MySQL nommee `gestion_decodeurs`.
+```bash
+git clone https://github.com/chounana01/gestion-decodeurs.git
+cd gestion-decodeurs
+```
 
-Exemple de configuration locale :
+Configurer la base de données MySQL `gestion_decodeurs` (voir ci-dessous), puis lancer :
 
-- utilisateur : `root`
-- mot de passe : votre mot de passe MySQL
+```bash
+./mvnw spring-boot:run
+```
+
+## Configuration de la base de données
 
 Le projet lit ces variables d'environnement :
 
@@ -47,4 +53,5 @@ Exemple sous PowerShell :
 ```powershell
 $env:DB_URL="jdbc:mysql://localhost:3306/gestion_decodeurs?createDatabaseIfNotExist=true"
 $env:DB_USERNAME="root"
-$env:DB_PASSWORD="VotreMotDePasse"
+$env:DB_PASSWORD="<votre-mot-de-passe>"
+```
